@@ -131,23 +131,13 @@ pub fn tests(
     let tests = slice_tests(&tests_source);
 
     let filepath = tests_path.to_string_lossy().to_string();
-    let filename = tests_path.file_stem().unwrap().to_string_lossy();
+    let filename = tests_path.file_stem().unwrap().to_string_lossy().replace('.', "_");
     let testing_fn = syn::Ident::new(&filename, Span::call_site());
 
     let mut tts = quote!(#fun);
     tts.extend(quote! {
         fn #testing_fn(expected: &str, actual: &str) -> Result<(), Box<dyn ::std::error::Error>> {
             const _: &str = include_str!(#filepath);
-
-            #[derive(Debug)]
-            struct TestFailure;
-            impl ::std::error::Error for TestFailure {}
-            impl ::std::fmt::Display for TestFailure {
-                fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                    write!(f, "{:?}", self)
-                }
-            }
-
             let actual = #ser(&#fn_name(actual))?;
             let expected = #ser(&#de::<#tested_type>(expected)?)?; // normalize
             assert_eq!(actual, expected);
