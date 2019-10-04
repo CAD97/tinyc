@@ -1,0 +1,28 @@
+keywords = [
+    "do",
+    "else",
+    "if",
+    "while",
+]
+
+literals = [
+    "integer",
+]
+
+punctuation = [
+    ['{', "left curly bracket"],
+    ['}', "right curly bracket"],
+    ['(', "left parenthesis"],
+    [')', "right parenthesis"],
+    ['+', "plus sign"],
+    ['-', "hyphen minus"],
+    ['<', "less than sign"],
+    [';', "semicolon"],
+    ['=', "equals sign"],
+]
+
+tokens = [
+    "error",
+    "identifier",
+    "whitespace",
+]

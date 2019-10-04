@@ -1,0 +1,18 @@
+[package]
+name = "tinyc_lexer"
+version = "0.1.0"
+edition = "2018"
+
+authors = ["cad97 <cad97@cad97.com>"]
+publish = false
+
+[dependencies]
+matches = "0.1.8"
+serde = "1.0.101"
+tinyc_grammar = { path = "../grammar" }
+
+[dev-dependencies]
+serde_yaml = "0.8.9"
+conformance = { path = "../conformance" }
+ron = "0.5.1"
+serde_json = "1.0.41"
