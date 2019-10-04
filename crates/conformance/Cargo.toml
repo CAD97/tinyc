@@ -4,6 +4,16 @@ version = "0.1.0"
 edition = "2018"
 
 authors = ["cad97 <cad97@cad97.com>"]
+description = "Conformance testing for fn(&str) -> impl Serialize + Deserialize"
+
+repository = "https://github.com/CAD97/tinyc/tree/master/crates/conformance"
+readme = "README.md"
+keywords = ["testing","conformance","serde"]
+categories = ["development-tools::testing"]
+license = "MIT OR Apache-2.0"
+
+[badges]
+maintenance = { status = "passively-maintained" }
 
 [lib]
 proc-macro = true
