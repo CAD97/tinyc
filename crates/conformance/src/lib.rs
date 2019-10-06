@@ -3,9 +3,18 @@ extern crate proc_macro;
 use {
     proc_macro2::{Span, TokenStream},
     quote::{quote, quote_spanned},
-    std::{env, fs::File, io::prelude::*, path::PathBuf},
+    std::{
+        env,
+        fs::File,
+        io::prelude::*,
+        path::{Path, PathBuf},
+    },
     syn::parse::Parse,
 };
+
+fn compile_error(s: &str, span: Span) -> TokenStream {
+    quote_spanned!(span=> compile_error! { #s })
+}
 
 struct AttrArgs {
     ser: syn::ExprPath,
@@ -44,44 +53,89 @@ impl Parse for AttrArgs {
     }
 }
 
-struct Test<'a> {
-    name: &'a str,
-    input: &'a str,
-    output: &'a str,
+struct Test {
+    name: syn::Ident,
+    input: String,
+    output: String,
 }
 
-// TODO: make this actually give useful parse errors
-fn slice_tests(s: &str) -> Vec<Test<'_>> {
-    assert!(
-        s.ends_with('\n'),
-        "test file needs to end with trailing newline"
-    );
-    let (tests, tail) = s.split_at(s.rfind("\n...").unwrap_or(0));
-    assert!(
-        tail.trim() == "..." || tail.trim().is_empty(),
-        "test file should end with test terminator `...`"
-    );
+fn read_tests(file_path: &Path, span: Span) -> Result<Vec<Test>, TokenStream> {
+    let source = {
+        let mut f = File::open(file_path)
+            .map_err(|e| compile_error(&format!("failed to open file: {}", e), span))?;
+        let mut s = String::with_capacity(f.metadata().map(|m| m.len() as usize + 1).unwrap_or(0));
+        f.read_to_string(&mut s)
+            .map_err(|e| compile_error(&format!("failed to read file: {}", e), span))?;
+        s
+    };
 
-    tests
-        .split("\n...\n")
-        .map(|s| {
-            let (head, output) =
-                s.split_at(s.find("\n---\n").expect(
-                    "test should have document marker `---` separating header and expected",
+    if !source.ends_with('\n') {
+        return Err(compile_error("file needs to have trailing newline", span));
+    }
+
+    let (s, trailing) = source.split_at(source.rfind("\n...\n").map_or(0, |i| i + 5));
+    if !trailing.trim().is_empty() {
+        return Err(compile_error(
+            "file has disallowed content after final `...`",
+            span,
+        ));
+    }
+
+    let mut tests = Vec::new();
+    let mut errs = TokenStream::new();
+
+    for (i, test) in s.split_terminator("\n...\n").enumerate() {
+        let i: usize = i;
+        let test: &str = test;
+
+        let (name, rest) = match test.find("\n===\n") {
+            Some(ix) => (&test[0..ix], &test[ix + 5..]),
+            None => {
+                errs.extend(compile_error(
+                    &format!("test {} does not have `===` after name", i),
+                    span,
                 ));
-            let output = &output[5..]; // strip separator
-            let (name, input) = head.split_at(
-                head.find("\n===\n")
-                    .expect("test should have header marker `===` separating name and input"),
-            );
-            let input = &input[5..]; // strip separator
-            Test {
-                name: name.trim(),
-                input: input.trim(),
-                output: output.trim(),
+                continue;
             }
+        };
+        let name = name.trim().replace(' ', "_");
+
+        let (input, output) = match rest.rfind("\n---\n") {
+            Some(ix) => (&rest[0..ix], &rest[ix + 5..]),
+            None => {
+                errs.extend(compile_error(
+                    &format!("test `{}` does not have `---` after input", name),
+                    span,
+                ));
+                continue;
+            }
+        };
+        let input = input.trim().to_string();
+        let output = output.trim().to_string();
+
+        let name = match syn::parse_str::<syn::Ident>(&format!("_{}", name)) {
+            Ok(name) => name,
+            Err(_) => {
+                errs.extend(compile_error(
+                    &format!("`{}` is not a valid test name identifier", name),
+                    span,
+                ));
+                continue;
+            }
+        };
+
+        tests.push(Test {
+            name,
+            input,
+            output,
         })
-        .collect()
+    }
+
+    if errs.is_empty() {
+        Ok(tests)
+    } else {
+        Err(errs)
+    }
 }
 
 #[proc_macro_attribute]
@@ -89,53 +143,52 @@ pub fn tests(
     attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    let mut errs = TokenStream::new();
+    // we want to re-emit the notated item in all cases
+    let mut tts: TokenStream = item.clone().into();
 
-    let fun = syn::parse_macro_input!(item as syn::ItemFn);
-    let AttrArgs{ ser, de, file } = syn::parse_macro_input!(attr as AttrArgs);
+    // emit as many environment compile errors as possible in one place
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR")
+        .map(PathBuf::from)
+        .map_err(|e| {
+            let e = format!("expected $CARGO_MANIFEST_DIR; {}", e);
+            compile_error(&e, Span::call_site())
+        });
+    let args = syn::parse::<AttrArgs>(attr).map_err(|e| e.to_compile_error());
+    let fun = syn::parse::<syn::ItemFn>(item).map_err(|e| e.to_compile_error());
+
+    match (args, fun, manifest_dir) {
+        (Ok(args), Ok(fun), Ok(manifest_dir)) => tts.extend(build_tests(args, fun, manifest_dir)),
+        (Err(a), Err(b), Err(c)) => tts.extend(vec![a, b, c]),
+        (Err(a), Err(b), _) | (Err(a), _, Err(b)) | (_, Err(a), Err(b)) => tts.extend(vec![a, b]),
+        (Err(a), _, _) | (_, Err(a), _) | (_, _, Err(a)) => tts.extend(vec![a]),
+    }
+
+    tts.into()
+}
+
+fn build_tests(args: AttrArgs, fun: syn::ItemFn, manifest_dir: PathBuf) -> TokenStream {
+    let AttrArgs { ser, de, file } = args;
     let fn_name = &fun.sig.ident;
     let tested_type = match &fun.sig.output {
         syn::ReturnType::Type(_, r#type) => (**r#type).clone(),
         syn::ReturnType::Default => syn::parse_str("()").unwrap(),
     };
 
-    let tests_path = PathBuf::from(
-        env::var("CARGO_MANIFEST_DIR")
-            .unwrap_or_else(|e| panic!("expected `CARGO_MANIFEST_DIR`, {}", e)),
-    )
-    .join(file.value());
-    let tests_source = match File::open(&tests_path) {
-        Ok(mut f) => {
-            let mut s =
-                String::with_capacity(f.metadata().map(|m| m.len() as usize + 1).unwrap_or(0));
-            match f.read_to_string(&mut s) {
-                Ok(_) => {}
-                Err(e) => {
-                    let e = format!("failed to read file: {}", e);
-                    errs.extend(quote_spanned! {file.span()=>
-                        compile_error! { #e }
-                    });
-                    return errs.into();
-                }
-            }
-            s
-        }
-        Err(e) => {
-            let e = format!("failed to open file: {}", e);
-            errs.extend(quote_spanned! {file.span()=>
-                compile_error! { #e }
-            });
-            return errs.into();
-        }
+    let tests_path = manifest_dir.join(file.value());
+    let tests = match read_tests(&tests_path, file.span()) {
+        Ok(it) => it,
+        Err(e) => return e,
     };
-    let tests = slice_tests(&tests_source);
 
     let filepath = tests_path.to_string_lossy().to_string();
-    let filename = tests_path.file_stem().unwrap().to_string_lossy().replace('.', "_");
+    let filename = tests_path
+        .file_stem()
+        .unwrap()
+        .to_string_lossy()
+        .replace('.', "_");
     let testing_fn = syn::Ident::new(&filename, Span::call_site());
 
-    let mut tts = quote!(#fun);
-    tts.extend(quote! {
+    let mut tts = quote! {
         fn #testing_fn(expected: &str, actual: &str) -> Result<(), Box<dyn ::std::error::Error>> {
             const _: &str = include_str!(#filepath);
             let actual = #ser(&#fn_name(actual))?;
@@ -143,7 +196,7 @@ pub fn tests(
             assert_eq!(actual, expected);
             Ok(())
         }
-    });
+    };
 
     for test in tests {
         let Test {
@@ -151,10 +204,7 @@ pub fn tests(
             input,
             output,
         } = test;
-        let test_name = syn::Ident::new(
-            &format!("{}_{}", filename, name.replace(' ', "_")),
-            Span::call_site(),
-        );
+        let test_name = quote::format_ident!("{}{}", filename, name);
         tts.extend(quote! {
             #[test]
             fn #test_name() -> Result<(), Box<dyn ::std::error::Error>> {
@@ -163,9 +213,5 @@ pub fn tests(
         })
     }
 
-    if errs.is_empty() {
-        tts.into()
-    } else {
-        errs.into()
-    }
+    tts.into()
 }

@@ -7,7 +7,6 @@ authors = ["cad97 <cad97@cad97.com>"]
 publish = false
 
 [dependencies]
-matches = "0.1.8"
 serde = "1.0.101"
 tinyc_grammar = { path = "../grammar" }
 
