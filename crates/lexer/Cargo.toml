@@ -11,7 +11,7 @@ serde = "1.0.101"
 tinyc_grammar = { path = "../grammar" }
 
 [dev-dependencies]
-serde_yaml = "0.8.9"
 conformance = { path = "../conformance" }
 ron = "0.5.1"
-serde_json = "1.0.41"
+json = { version = "1.0.41", package = "serde_json" }
+yaml = { version = "0.8.9", package = "serde_yaml" }

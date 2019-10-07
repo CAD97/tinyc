@@ -19,6 +19,7 @@ fn compile_error(s: &str, span: Span) -> TokenStream {
 struct AttrArgs {
     ser: syn::ExprPath,
     de: syn::ExprPath,
+    value: Option<syn::Type>,
     file: syn::LitStr,
 }
 
@@ -29,27 +30,111 @@ impl Parse for AttrArgs {
             syn::custom_keyword!(file);
             syn::custom_keyword!(ser);
             syn::custom_keyword!(de);
+            syn::custom_keyword!(value);
+            syn::custom_keyword!(serde);
         }
 
         // TODO: add `superset` mode where actual is "at least" expected
         let _: kw::exact = input.parse()?;
         let _: syn::Token![,] = input.parse()?;
 
-        let _: kw::ser = input.parse()?;
-        let _: syn::Token![=] = input.parse()?;
-        let ser: syn::ExprPath = input.parse()?;
-        let _: syn::Token![,] = input.parse()?;
+        let la = input.lookahead1();
+        let (ser, de, value) = if la.peek(kw::serde) {
+            let _: kw::serde = input.parse()?;
+            let _: syn::Token![=] = input.parse()?;
+            let format: syn::ExprPath = input.parse()?;
+            let _: syn::Token![,] = input.parse()?;
 
-        let _: kw::de = input.parse()?;
-        let _: syn::Token![=] = input.parse()?;
-        let de: syn::ExprPath = input.parse()?;
-        let _: syn::Token![,] = input.parse()?;
+            // FUTURE(rust-lang/rust#64797): use #[cfg(accessible)] to prefer `to_string_pretty`
+            // as well as fall back to the `::ser::to_string`/`::de::from_str`/`::value::Value`
+
+            // for errors
+            let la = input.lookahead1();
+            if !(la.peek(kw::ser) || la.peek(kw::de) || la.peek(kw::value) | la.peek(kw::file)) {
+                return Err(la.error())?;
+            }
+
+            let ser: syn::ExprPath = if input.peek(kw::ser) {
+                let _: kw::ser = input.parse()?;
+                let _: syn::Token![=] = input.parse()?;
+                let ser: syn::ExprPath = input.parse()?;
+                let _: syn::Token![,] = input.parse()?;
+
+                // for errors
+                let la = input.lookahead1();
+                if !(la.peek(kw::de) || la.peek(kw::value) | la.peek(kw::file)) {
+                    return Err(la.error())?;
+                }
+
+                ser
+            } else {
+                syn::parse_quote!(#format::to_string)
+            };
+
+            let de: syn::ExprPath = if input.peek(kw::de) {
+                let _: kw::de = input.parse()?;
+                let _: syn::Token![=] = input.parse()?;
+                let de: syn::ExprPath = input.parse()?;
+                let _: syn::Token![,] = input.parse()?;
+
+                // for errors
+                let la = input.lookahead1();
+                if !(la.peek(kw::value) | la.peek(kw::file)) {
+                    return Err(la.error())?;
+                }
+
+                de
+            } else {
+                syn::parse_quote!(#format::from_str)
+            };
+
+            let value: syn::Type = if input.peek(kw::value) {
+                let _: kw::value = input.parse()?;
+                let _: syn::Token![=] = input.parse()?;
+                let value: syn::Type = input.parse()?;
+                let _: syn::Token![,] = input.parse()?;
+                value
+            } else {
+                syn::parse_quote!(#format::Value)
+            };
+
+            (ser, de, Some(value))
+        } else if la.peek(kw::ser) {
+            let _: kw::ser = input.parse()?;
+            let _: syn::Token![=] = input.parse()?;
+            let ser: syn::ExprPath = input.parse()?;
+            let _: syn::Token![,] = input.parse()?;
+
+            let _: kw::de = input.parse()?;
+            let _: syn::Token![=] = input.parse()?;
+            let de: syn::ExprPath = input.parse()?;
+            let _: syn::Token![,] = input.parse()?;
+
+            let value = if input.peek(kw::value) {
+                let _: kw::value = input.parse()?;
+                let _: syn::Token![=] = input.parse()?;
+                let value: syn::Type = input.parse()?;
+                let _: syn::Token![,] = input.parse()?;
+                Some(value)
+            } else {
+                None
+            };
+
+            (ser, de, value)
+        } else {
+            return Err(la.error())?;
+        };
 
         let _: kw::file = input.parse()?;
         let _: syn::Token![=] = input.parse()?;
         let file: syn::LitStr = input.parse()?;
 
-        Ok(AttrArgs { ser, de, file })
+        Ok(AttrArgs {
+            ser,
+            de,
+            value,
+            file,
+        })
     }
 }
 
@@ -167,12 +252,13 @@ pub fn tests(
 }
 
 fn build_tests(args: AttrArgs, fun: syn::ItemFn, manifest_dir: PathBuf) -> TokenStream {
-    let AttrArgs { ser, de, file } = args;
+    let AttrArgs { ser, de, value, file } = args;
     let fn_name = &fun.sig.ident;
     let tested_type = match &fun.sig.output {
         syn::ReturnType::Type(_, r#type) => (**r#type).clone(),
         syn::ReturnType::Default => syn::parse_str("()").unwrap(),
     };
+    let de_type = value.unwrap_or(tested_type);
 
     let tests_path = manifest_dir.join(file.value());
     let tests = match read_tests(&tests_path, file.span()) {
@@ -192,7 +278,7 @@ fn build_tests(args: AttrArgs, fun: syn::ItemFn, manifest_dir: PathBuf) -> Token
         fn #testing_fn(expected: &str, actual: &str) -> Result<(), Box<dyn ::std::error::Error>> {
             const _: &str = include_str!(#filepath);
             let actual = #ser(&#fn_name(actual))?;
-            let expected = #ser(&#de::<#tested_type>(expected)?)?; // normalize
+            let expected = #ser(&#de::<#de_type>(expected)?)?; // normalize
             assert_eq!(actual, expected);
             Ok(())
         }
