@@ -6,20 +6,12 @@
 
 pub use tinyc_grammar::SyntaxKind;
 
-use std::fmt;
-
 mod serde;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Token {
     pub kind: SyntaxKind,
     pub len: u32,
-}
-
-impl fmt::Display for Token {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}: {}", self.kind, self.len)
-    }
 }
 
 pub fn tokenize(mut source: &str) -> impl Iterator<Item = Token> + '_ {
@@ -38,41 +30,37 @@ pub fn lex(source: &str) -> Token {
     if source.starts_with(is_whitespace) {
         Token {
             kind: SyntaxKind::Whitespace,
-            len: source.find(is_not_whitespace).unwrap_or(source.len()) as u32,
+            len: source
+                .find(is_not_whitespace)
+                .unwrap_or_else(|| source.len()) as u32,
         }
     } else if source.starts_with(is_digit) {
         Token {
             kind: SyntaxKind::Integer,
-            len: source.find(is_not_digit).unwrap_or(source.len()) as u32,
+            len: source.find(is_not_digit).unwrap_or_else(|| source.len()) as u32,
         }
     } else if source.starts_with(is_ident) {
-        let len = source.find(is_not_ident).unwrap_or(source.len());
+        let len = source.find(is_not_ident).unwrap_or_else(|| source.len());
         Token {
             kind: SyntaxKind::from_identifier(&source[..len]),
             len: len as u32,
         }
     } else {
+        let ch = source.chars().next().unwrap();
         Token {
-            kind: match source.chars().next() {
-                Some('{') => SyntaxKind::LeftCurlyBracket,
-                Some('}') => SyntaxKind::RightCurlyBracket,
-                Some('(') => SyntaxKind::LeftParenthesis,
-                Some(')') => SyntaxKind::RightParenthesis,
-                Some('+') => SyntaxKind::PlusSign,
-                Some('-') => SyntaxKind::HyphenMinus,
-                Some('<') => SyntaxKind::LessThanSign,
-                Some(';') => SyntaxKind::Semicolon,
-                Some('=') => SyntaxKind::EqualsSign,
-                _ => panic!(
-                    "lex error: {}",
-                    source
-                        .chars()
-                        .next()
-                        .map(|c| c.escape_unicode().to_string())
-                        .unwrap_or("unexpected eof".to_string())
-                ),
+            kind: match ch {
+                '{' => SyntaxKind::LeftCurlyBracket,
+                '}' => SyntaxKind::RightCurlyBracket,
+                '(' => SyntaxKind::LeftParenthesis,
+                ')' => SyntaxKind::RightParenthesis,
+                '+' => SyntaxKind::PlusSign,
+                '-' => SyntaxKind::HyphenMinus,
+                '<' => SyntaxKind::LessThanSign,
+                ';' => SyntaxKind::Semicolon,
+                '=' => SyntaxKind::EqualsSign,
+                _ => SyntaxKind::Error,
             },
-            len: 1,
+            len: ch.len_utf8() as u32,
         }
     }
 }

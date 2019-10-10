@@ -1,9 +1,14 @@
-use std::path::PathBuf;
 use {
     glob::glob,
     heck::*,
     serde::{Deserialize, Serialize},
-    std::{collections::HashMap, env, error::Error, fs, path::Path},
+    std::{
+        collections::HashMap,
+        env,
+        error::Error,
+        fs,
+        path::{Path, PathBuf},
+    },
     tera::{self, Context, Tera, Value},
     toml,
 };

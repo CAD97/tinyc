@@ -1,7 +1,7 @@
 use {
     super::*,
     ::serde::{
-        de::{Deserialize, Deserializer, EnumAccess, Visitor, VariantAccess},
+        de::{Deserialize, Deserializer, EnumAccess, VariantAccess, Visitor},
         ser::{Serialize, Serializer},
     },
     std::fmt,

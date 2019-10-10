@@ -252,7 +252,12 @@ pub fn tests(
 }
 
 fn build_tests(args: AttrArgs, fun: syn::ItemFn, manifest_dir: PathBuf) -> TokenStream {
-    let AttrArgs { ser, de, value, file } = args;
+    let AttrArgs {
+        ser,
+        de,
+        value,
+        file,
+    } = args;
     let fn_name = &fun.sig.ident;
     let tested_type = match &fun.sig.output {
         syn::ReturnType::Type(_, r#type) => (**r#type).clone(),

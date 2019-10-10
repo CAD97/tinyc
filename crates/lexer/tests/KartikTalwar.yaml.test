@@ -105,7 +105,7 @@ a=b=c=2<3;
 - Integer: 1
 - Semicolon: 1
 - Whitespace: 1
-- Do: 2
+- Identifier: 2
 - Whitespace: 1
 - Identifier: 1
 - EqualsSign: 1
