@@ -1,0 +1,33 @@
+# The keywords of our language.
+keywords = [
+    "else",
+    "if",
+    "while",
+]
+
+# Literal data embedded in the source.
+literals = [
+    "integer",
+]
+
+# Symbols alongside names for them.
+punctuation = [
+    ['{', "left curly bracket"],
+    ['}', "right curly bracket"],
+    ['(', "left parenthesis"],
+    [')', "right parenthesis"],
+    ['+', "plus sign"],
+    ['-', "hyphen minus"],
+    ['<', "less than sign"],
+    [';', "semicolon"],
+    ['=', "equals sign"],
+]
+
+# Tokens that don't fall into one of the above categories.
+# "error" is for errors: when we encounter something unexpected.
+# "whitespace" is the white space between tokens, and is explicit in our lexer.
+tokens = [
+    "error",
+    "identifier",
+    "whitespace",
+]
