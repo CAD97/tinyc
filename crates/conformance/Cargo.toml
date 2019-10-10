@@ -1,10 +1,10 @@
 [package]
 name = "conformance"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 
 authors = ["cad97 <cad97@cad97.com>"]
-description = "Conformance testing for fn(&str) -> impl Serialize + Deserialize"
+description = "Conformance testing for fn(&str) -> impl Serialize"
 
 repository = "https://github.com/CAD97/tinyc/tree/master/crates/conformance"
 readme = "README.md"

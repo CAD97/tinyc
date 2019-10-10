@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "conformance"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "proc-macro2 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -499,7 +499,7 @@ dependencies = [
 name = "tinyc_lexer"
 version = "0.1.0"
 dependencies = [
- "conformance 0.1.0",
+ "conformance 0.2.0",
  "ron 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.41 (registry+https://github.com/rust-lang/crates.io-index)",

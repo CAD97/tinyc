@@ -28,10 +28,7 @@ use {
     tinyc_lexer::{tokenize, Token},
 };
 
-#[conformance::tests(exact,
-    ser = serde_yaml::to_string,
-    de = serde_yaml::from_str,
-    file = "tests/simple.yaml.test")]
+#[conformance::tests(exact, serde=serde_yaml, file="tests/simple.yaml.test")]
 fn lex_tokens(s: &str) -> Vec<Token> {
     tokenize(s).collect()
 }
@@ -49,10 +46,17 @@ Any number of tests can be included in one conformance test file.
 The file name and the test name (above the `===`) are combined
 and used to name the test given to the standard Rust test runner.
 
-The `ser` and `de` functions don't have to be `serde`, they just
-have to meet the shape of `fn<T>(&T) -> String` for serialization
-and `fn<T>(&str) -> Result<T, impl Error>` for deserialization.
+The `serde` argument stands in for three arguments
+that may be provided, in order, in its place:
+- `ser`: `fn<T>(&T) -> String` (default `serde::to_string`)
+- `de`: `fn(&str) -> Result<value, impl Error>` (default `serde::from_str`)
+- `value`: A type that be passed to `ser` (default `serde::Value`)
 
-For more information, see the [dev.to announcement post][blog].
+You can also just supply `ser` and `de`,
+and `value` defaults to the produced type.
+
+For more information, see the [dev.to announcement post][blog]
+or @ me [on Discord][Discord].
 
   [blog]: <https://dev.to/cad97/conformance-testing-in-rust-3h5m>
+  [Discord]: <https://discord.gg/FuPE9JE>
