@@ -51,7 +51,7 @@ impl Parse for AttrArgs {
             // for errors
             let la = input.lookahead1();
             if !(la.peek(kw::ser) || la.peek(kw::de) || la.peek(kw::value) | la.peek(kw::file)) {
-                return Err(la.error())?;
+                return Err(la.error());
             }
 
             let ser: syn::ExprPath = if input.peek(kw::ser) {
@@ -63,7 +63,7 @@ impl Parse for AttrArgs {
                 // for errors
                 let la = input.lookahead1();
                 if !(la.peek(kw::de) || la.peek(kw::value) | la.peek(kw::file)) {
-                    return Err(la.error())?;
+                    return Err(la.error());
                 }
 
                 ser
@@ -80,7 +80,7 @@ impl Parse for AttrArgs {
                 // for errors
                 let la = input.lookahead1();
                 if !(la.peek(kw::value) | la.peek(kw::file)) {
-                    return Err(la.error())?;
+                    return Err(la.error());
                 }
 
                 de
@@ -122,7 +122,7 @@ impl Parse for AttrArgs {
 
             (ser, de, value)
         } else {
-            return Err(la.error())?;
+            return Err(la.error());
         };
 
         let _: kw::file = input.parse()?;
@@ -304,5 +304,5 @@ fn build_tests(args: AttrArgs, fun: syn::ItemFn, manifest_dir: PathBuf) -> Token
         })
     }
 
-    tts.into()
+    tts
 }

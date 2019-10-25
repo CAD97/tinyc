@@ -3,4 +3,5 @@ members = [
     'crates/conformance',
     'crates/grammar',
     'crates/lexer',
+    'crates/parser',
 ]

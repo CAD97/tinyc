@@ -21,7 +21,23 @@ punctuation = [
 ]
 
 tokens = [
-    "error",
     "identifier",
     "whitespace",
+]
+
+nonterminals = [
+    "program",
+    "statement if",
+    "statement while",
+    "statement block",
+    "statement expression",
+    "expression parenthesized",
+    "expression assignment",
+    "expression comparison",
+    "expression addition",
+    "expression subtraction",
+    "expression term",
+    "term identifier",
+    "term integer",
+    "term expression",
 ]

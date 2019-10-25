@@ -1,0 +1,17 @@
+[package]
+name = "tinyc_parser"
+version = "0.1.0"
+edition = "2018"
+
+authors = ["cad97 <cad97@cad97.com>"]
+publish = false
+
+[dependencies]
+drop_bomb = "0.1.4"
+serde = { version = "1.0.101", features = ["derive"] }
+tinyc_grammar = { path = "../grammar" }
+
+[dev-dependencies]
+conformance = { path = "../conformance" }
+tinyc_lexer = { path = "../lexer" }
+yaml = { version = "0.8.9", package = "serde_yaml" }

@@ -1,0 +1,442 @@
+1
+===
+a=b=c=2<3;
+---
+- Start: { kind: Program }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+...
+
+2
+===
+{ i=1; while (i<100) i=i+i; }
+---
+- Start: { kind: Program }
+- Start: { kind: StatementBlock }
+- Leaf: { kind: LeftCurlyBracket }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementWhile }
+- Leaf: { kind: While }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionAddition }
+- Leaf: { kind: PlusSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+- Leaf: { kind: RightCurlyBracket }
+- Finish
+- Finish
+...
+
+3
+===
+{ i=125; j=100; while (i-j) if (i<j) j=j-i; else i=i-j; }
+---
+- Start: { kind: Program }
+- Start: { kind: StatementBlock }
+- Leaf: { kind: LeftCurlyBracket }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementWhile }
+- Leaf: { kind: While }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionSubtraction }
+- Leaf: { kind: HyphenMinus }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementIf }
+- Leaf: { kind: If }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionSubtraction }
+- Leaf: { kind: HyphenMinus }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Leaf: { kind: Else }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionSubtraction }
+- Leaf: { kind: HyphenMinus }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightCurlyBracket }
+- Finish
+- Finish
+...
+
+4
+===
+{ i=1; do i=i+10; while (i<50); }
+---
+- Start: { kind: Program }
+- Start: { kind: StatementBlock }
+- Leaf: { kind: LeftCurlyBracket }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Error: { message: expected Semicolon }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionAddition }
+- Leaf: { kind: PlusSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementWhile }
+- Leaf: { kind: While }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementExpression }
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+- Leaf: { kind: RightCurlyBracket }
+- Finish
+- Finish
+...
+
+5
+===
+{ i=1; while ((i=i+10)<50) ; }
+---
+- Start: { kind: Program }
+- Start: { kind: StatementBlock }
+- Leaf: { kind: LeftCurlyBracket }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementWhile }
+- Leaf: { kind: While }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionParenthesized, forward_parent: 21 }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionAddition }
+- Leaf: { kind: PlusSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementExpression }
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+- Leaf: { kind: RightCurlyBracket }
+- Finish
+- Finish
+...
+
+6
+===
+{ i=7; if (i<5) x=1; if (i<10) y=2; }
+---
+- Start: { kind: Program }
+- Start: { kind: StatementBlock }
+- Leaf: { kind: LeftCurlyBracket }
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Start: { kind: StatementIf }
+- Leaf: { kind: If }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+- Start: { kind: StatementIf }
+- Leaf: { kind: If }
+- Start: { kind: ExpressionParenthesized }
+- Leaf: { kind: LeftParenthesis }
+- Start: { kind: ExpressionTerm, forward_parent: 5 }
+- Start: { kind: TermIdentifier }
+- Leaf: { kind: Identifier }
+- Finish
+- Finish
+- Start: { kind: ExpressionComparison }
+- Leaf: { kind: LessThanSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: RightParenthesis }
+- Finish
+- Start: { kind: StatementExpression }
+- Start: { kind: ExpressionAssignment }
+- Leaf: { kind: Identifier }
+- Leaf: { kind: EqualsSign }
+- Start: { kind: ExpressionTerm }
+- Start: { kind: TermInteger }
+- Leaf: { kind: Integer }
+- Finish
+- Finish
+- Finish
+- Leaf: { kind: Semicolon }
+- Finish
+- Finish
+- Leaf: { kind: RightCurlyBracket }
+- Finish
+- Finish
+...

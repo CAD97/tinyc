@@ -18,17 +18,67 @@ const SYNTAX_CONFIG: &str = "meta/syntax.toml";
 const TEMPLATE_DIR: &str = "templates";
 
 pub const SYNTAX_KINDS: &str = "syntax_kinds.rs";
+pub const TOKEN_KINDS: &str = "token_kinds.rs";
 
 fn project_root() -> &'static Path {
     Path::new(MANIFEST).ancestors().nth(2).unwrap()
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 struct SyntaxConfig {
     keywords: Vec<String>,
     literals: Vec<String>,
     punctuation: Vec<PunctuationConfig>,
     tokens: Vec<String>,
+    nonterminals: Vec<String>,
+    // calculated
+    terminals: Vec<String>,
+    all_kinds: Vec<String>,
+}
+
+impl<'de> Deserialize<'de> for SyntaxConfig {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(rename = "SyntaxConfig")]
+        struct Helper {
+            keywords: Vec<String>,
+            literals: Vec<String>,
+            punctuation: Vec<PunctuationConfig>,
+            tokens: Vec<String>,
+            nonterminals: Vec<String>,
+        }
+        let Helper {
+            keywords,
+            literals,
+            punctuation,
+            tokens,
+            nonterminals,
+        } = Helper::deserialize(deserializer)?;
+        let terminals: Vec<_> = keywords
+            .iter()
+            .chain(literals.iter())
+            .chain(punctuation.iter().map(|punct| &punct.name))
+            .chain(tokens.iter())
+            .cloned()
+            .collect();
+        let all_kinds: Vec<_> = terminals
+            .iter()
+            .chain(nonterminals.iter())
+            .cloned()
+            .collect();
+        Ok(SyntaxConfig {
+            keywords,
+            literals,
+            punctuation,
+            tokens,
+            nonterminals,
+            terminals,
+            all_kinds,
+        })
+    }
 }
 
 #[derive(Serialize)]
@@ -38,7 +88,7 @@ struct PunctuationConfig {
 }
 
 impl<'de> Deserialize<'de> for PunctuationConfig {
-    fn deserialize<D>(deserializer: D) -> Result<Self, <D as serde::de::Deserializer<'de>>::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::de::Deserializer<'de>,
     {
@@ -93,6 +143,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     fs::write(
         out.join(SYNTAX_KINDS),
         tera.render(SYNTAX_KINDS, context.clone())?,
+    )?;
+    fs::write(
+        out.join(TOKEN_KINDS),
+        tera.render(TOKEN_KINDS, context.clone())?,
     )?;
     Ok(())
 }

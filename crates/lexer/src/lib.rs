@@ -4,15 +4,7 @@
 //
 // For the "canonical" Tiny-C lexer, see <https://gist.github.com/KartikTalwar/3095780>
 
-pub use tinyc_grammar::SyntaxKind;
-
-mod serde;
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub struct Token {
-    pub kind: SyntaxKind,
-    pub len: u32,
-}
+pub use tinyc_grammar::{TokenKind, Token};
 
 pub fn tokenize(mut source: &str) -> impl Iterator<Item = Token> + '_ {
     std::iter::from_fn(move || {
@@ -29,36 +21,36 @@ pub fn lex(source: &str) -> Token {
     debug_assert!(!source.is_empty());
     if source.starts_with(is_whitespace) {
         Token {
-            kind: SyntaxKind::Whitespace,
+            kind: TokenKind::Whitespace,
             len: source
                 .find(is_not_whitespace)
                 .unwrap_or_else(|| source.len()) as u32,
         }
     } else if source.starts_with(is_digit) {
         Token {
-            kind: SyntaxKind::Integer,
+            kind: TokenKind::Integer,
             len: source.find(is_not_digit).unwrap_or_else(|| source.len()) as u32,
         }
     } else if source.starts_with(is_ident) {
         let len = source.find(is_not_ident).unwrap_or_else(|| source.len());
         Token {
-            kind: SyntaxKind::from_identifier(&source[..len]),
+            kind: TokenKind::from_identifier(&source[..len]),
             len: len as u32,
         }
     } else {
         let ch = source.chars().next().unwrap();
         Token {
             kind: match ch {
-                '{' => SyntaxKind::LeftCurlyBracket,
-                '}' => SyntaxKind::RightCurlyBracket,
-                '(' => SyntaxKind::LeftParenthesis,
-                ')' => SyntaxKind::RightParenthesis,
-                '+' => SyntaxKind::PlusSign,
-                '-' => SyntaxKind::HyphenMinus,
-                '<' => SyntaxKind::LessThanSign,
-                ';' => SyntaxKind::Semicolon,
-                '=' => SyntaxKind::EqualsSign,
-                _ => SyntaxKind::Error,
+                '{' => TokenKind::LeftCurlyBracket,
+                '}' => TokenKind::RightCurlyBracket,
+                '(' => TokenKind::LeftParenthesis,
+                ')' => TokenKind::RightParenthesis,
+                '+' => TokenKind::PlusSign,
+                '-' => TokenKind::HyphenMinus,
+                '<' => TokenKind::LessThanSign,
+                ';' => TokenKind::Semicolon,
+                '=' => TokenKind::EqualsSign,
+                _ => TokenKind::ERROR,
             },
             len: ch.len_utf8() as u32,
         }
