@@ -13,7 +13,7 @@ impl TokenSet {
     pub(crate) const EMPTY: TokenSet = TokenSet(0);
 
     pub(crate) fn new(kind: TokenKind) -> TokenSet {
-        TokenSet(1u128 << (kind as u16 as usize))
+        TokenSet(1u128 << (kind as u16))
     }
 }
 
