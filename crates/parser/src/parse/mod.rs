@@ -10,7 +10,7 @@
 //! ```text
 //! Program = Statement*;
 //! Statement =
-//!   | If:{ "if" cond:(Expression::Parenthesized) then:Statement else:{ "else" then:Statement } }
+//!   | If:{ "if" cond:(Expression::Parenthesized) then:Statement { "else" else:Statement }? }
 //!   | While:{ "while" cond:(Expression::Parenthesized) then:Statement }
 //!   | Block:{ "{" then:Statement* "}" }
 //!   | Expression:{ then:Expression? ";" }
@@ -57,7 +57,7 @@ pub(super) fn Program(p: &mut Parser) {
 
 /// ```text
 /// Statement =
-///   | If:{ "if" cond:(Expression::Parenthesized) then:Statement else:{ "else" then:Statement } }
+///   | If:{ "if" cond:(Expression::Parenthesized) then:Statement { "else" else:Statement } }
 ///   | While:{ "while" cond:(Expression::Parenthesized) then:Statement }
 ///   | Block:{ "{" then:Statement* "}" }
 ///   | Expression:{ then:Expression? ";" }

@@ -1,7 +1,7 @@
 use super::*;
 
 /// ```text
-/// Statement |= If: { "if" cond:(Expression::Parenthesized) then:Statement else:{ "else" then:Statement } } ;
+/// Statement |= If: { "if" cond:(Expression::Parenthesized) then:Statement { "else" else:Statement }? } ;
 /// ```
 pub(super) fn If(p: &mut Parser) {
     let m = p.start();
