@@ -140,13 +140,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let config: SyntaxConfig = toml::from_str(&fs::read_to_string(syntax_config)?)?;
     let context = Context::from_serialize(config)?;
 
-    fs::write(
-        out.join(SYNTAX_KINDS),
-        tera.render(SYNTAX_KINDS, context.clone())?,
-    )?;
-    fs::write(
-        out.join(TOKEN_KINDS),
-        tera.render(TOKEN_KINDS, context.clone())?,
-    )?;
+    fs::write(out.join(SYNTAX_KINDS), tera.render(SYNTAX_KINDS, &context)?)?;
+    fs::write(out.join(TOKEN_KINDS), tera.render(TOKEN_KINDS, &context)?)?;
     Ok(())
 }
