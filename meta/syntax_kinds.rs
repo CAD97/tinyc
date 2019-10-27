@@ -1,57 +1,72 @@
-// This is just a workaround: for some reason
-// a tera filter expression cannot start with a literal empty array
 {%- set empty = [] -%}
-// Create a variable for accessing every kind
-// by concatenating each individual kind
-{%- set all_kinds = empty
+// Separate variables for terminals and nonterminals
+{%- set terminals = empty
     | concat(with=keywords)
     | concat(with=literals)
     | concat(with=punctuation | map(attribute="name"))
     | concat(with=tokens)
 -%}
+{%- set all_kinds = empty
+    | concat(with=terminals)
+    | concat(with=nonterminals)
+-%}
 
-// Rowan internally stores kind as a u16
 #[repr(u16)]
-// We won't be generating docs
 #[allow(missing_docs)]
-// Derive all of the standard traits we can
+// Add serde to runtime dependencies.
+// TokenKind should impl `Serialize` as well.
+#[derive(serde::Serialize)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum SyntaxKind {
     {%- for kind in all_kinds %}
-    // List each kind in camel_case
     {{ kind | camel_case }},
     {%- endfor %}
-}
-
-impl SyntaxKind {
-    /// The syntax kind for a keyword.
-    pub fn from_keyword(ident: &str) -> Option<SyntaxKind> {
-        match ident {
-            {% for keyword in keywords -%}
-            "{{ keyword }}" => Some(SyntaxKind::{{ keyword | camel_case }}),
-            {% endfor -%}
-            _ => None,
-        }
-    }
-
-    /// The syntax kind for an identifer.
-    ///
-    /// Note that this doesn't do any validation of the identifier,
-    /// it just uses whatever you give it.
-    pub fn from_identifier(ident: &str) -> SyntaxKind {
-        SyntaxKind::from_keyword(ident).unwrap_or(SyntaxKind::Identifier)
-    }
+    ERROR,
 }
 
 impl SyntaxKind {
     /// The name of this syntax kind.
     pub fn name(self) -> &'static str {
         match self {
-            {% for kind in all_kinds -%}
+            {%- for kind in all_kinds %}
             SyntaxKind::{{ kind | camel_case }} => "{{ kind | camel_case }}",
-            {% endfor -%}
-            #[allow(unreachable_patterns)]
-            _ => "", // For the future
+            {%- endfor %}
+            SyntaxKind::ERROR => "ERROR",
+        }
+    }
+}
+
+// We need to convert from TokenKind to SyntaxKind.
+// This could be explicitly zero-cost by using a transmute,
+// but we stick here to the safe version and let it optimize.
+impl From<TokenKind> for SyntaxKind {
+    fn from(token: TokenKind) -> SyntaxKind {
+        match token {
+            {%- for kind in terminals %}
+            TokenKind::{{ kind | camel_case }} => SyntaxKind::{{ kind | camel_case }},
+            {%- endfor %}
+            TokenKind::ERROR => SyntaxKind::ERROR,
+        }
+    }
+}
+
+// For rowan, we also want conversions to/from u16.
+// We also want these impls for TokenKind as well.
+impl From<SyntaxKind> for u16 {
+    fn from(kind: SyntaxKind) -> u16 {
+        kind as u16
+    }
+}
+
+// This could be explicitly zero-cost by using a transmute,
+// but we stick here to the safe version and let it optimize.
+impl From<u16> for SyntaxKind {
+    fn from(raw: u16) -> SyntaxKind {
+        match raw {
+            {%- for kind in all_kinds %}
+            {{ loop.index }} => SyntaxKind::{{ kind | camel_case }},
+            {%- endfor %}
+            _ => SyntaxKind::ERROR,
         }
     }
 }

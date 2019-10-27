@@ -24,10 +24,25 @@ punctuation = [
 ]
 
 # Tokens that don't fall into one of the above categories.
-# "error" is for errors: when we encounter something unexpected.
 # "whitespace" is the white space between tokens, and is explicit in our lexer.
 tokens = [
-    "error",
     "identifier",
     "whitespace",
+]
+
+nonterminals = [
+    "program",
+    "statement if",
+    "statement while",
+    "statement block",
+    "statement expression",
+    "expression parenthesized",
+    "expression assignment",
+    "expression comparison",
+    "expression addition",
+    "expression subtraction",
+    "expression term",
+    "term identifier",
+    "term integer",
+    "term expression",
 ]

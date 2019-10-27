@@ -426,7 +426,7 @@ dependencies = [
 
 [[package]]
 name = "tera"
-version = "1.0.0-beta.16"
+version = "1.0.0-beta.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -469,7 +469,7 @@ dependencies = [
  "glob 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "heck 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
- "tera 1.0.0-beta.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tera 1.0.0-beta.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -656,7 +656,7 @@ dependencies = [
 "checksum sha-1 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "23962131a91661d643c98940b20fcaffe62d776a823247be80a48fcb8b6fce68"
 "checksum slug 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b3bc762e6a4b6c6fcaade73e77f9ebc6991b676f88bb2358bddb56560f073373"
 "checksum syn 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "66850e97125af79138385e9b88339cbcd037e3f28ceab8c5ad98e64f0f1f80bf"
-"checksum tera 1.0.0-beta.16 (registry+https://github.com/rust-lang/crates.io-index)" = "e0fa13465ab85540a4d069fbe9c76af96e78ef83046af4ed54e7be33ef98c3eb"
+"checksum tera 1.0.0-beta.18 (registry+https://github.com/rust-lang/crates.io-index)" = "5ea19e023cbf68ab01a85becebd92c59db0aff3d04a7537ebe156e39b7f44e21"
 "checksum thread_local 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "c6b53e329000edc2b34dbe8545fd20e55a333362d0a321909685a19bd28c3f1b"
 "checksum time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)" = "db8dcfca086c1143c9270ac42a2bbd8a7ee477b78ac8e45b19abfb0cbede4b6f"
 "checksum toml 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "c7aabe75941d914b72bf3e5d3932ed92ce0664d49d8432305a8b547c37227724"

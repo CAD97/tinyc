@@ -6,7 +6,7 @@ edition = "2018"
 authors = ["cad97 <cad97@cad97.com>"]
 
 [dependencies]
-serde = { version = "1.0.101" }
+serde = "1.0.101"
 tinyc_grammar = { path = "../grammar" }
 
 [dev-dependencies]

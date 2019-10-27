@@ -22,6 +22,8 @@ const TEMPLATE_DIR: &str = "meta";
 
 /// The sytnax kinds enum template.
 pub const SYNTAX_KINDS: &str = "syntax_kinds.rs";
+/// The token kinds enum template
+pub const TOKEN_KINDS: &str = "token_kinds.rs";
 
 /// Easy access to the project root path.
 fn project_root() -> &'static Path {
@@ -39,6 +41,7 @@ struct SyntaxConfig {
     literals: Vec<String>,
     punctuation: Vec<PunctuationConfig>,
     tokens: Vec<String>,
+    nonterminals: Vec<String>,
 }
 
 /// A punctuation config item, represented in toml as `["character", "name"]`.
@@ -63,7 +66,6 @@ impl<'de> Deserialize<'de> for PunctuationConfig {
         #[derive(Deserialize)]
         #[serde(rename = "PunctuationConfig")]
         struct Helper(char, String);
-        // We implement deserialize by just delegating to a helper tuple struct type.
         Helper::deserialize(deserializer).map(|helper| PunctuationConfig {
             character: helper.0,
             name: helper.1,
@@ -87,20 +89,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     let root = project_root();
     let templates = root.join(TEMPLATE_DIR).join("**/*.rs");
     let syntax_config = root.join(SYNTAX_CONFIG);
-    // All generated files go into `$OUT_DIR` and are `include!`d from there.
     let out = PathBuf::from(env::var("OUT_DIR")?);
 
-    // We have to tell cargo we depend on these files
-    // so that cargo will rerun the build script when the files change.
     println!("cargo:rerun-if-changed={}", syntax_config.to_string_lossy());
     for path in glob(&templates.to_string_lossy())? {
         println!("cargo:rerun-if-changed={}", path?.to_string_lossy());
     }
 
     let tera = {
-        // Initialize Tera.
         let mut tera = Tera::new(&root.join(templates).to_string_lossy())?;
-        // Add the `camel_case` filter using `heck`.
         tera.register_filter(
             "camel_case",
             make_filter_fn("camel_case", |s: String| s.to_camel_case()),
@@ -108,15 +105,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         tera
     };
 
-    // Read in the context file.
     let config: SyntaxConfig = toml::from_str(&fs::read_to_string(syntax_config)?)?;
-    // And convert it into the Tera-compatible form.
     let context = Context::from_serialize(config)?;
 
-    // Write out the generated file.
-    fs::write(
-        out.join(SYNTAX_KINDS),
-        tera.render(SYNTAX_KINDS, context.clone())?,
-    )?;
+    fs::write(out.join(TOKEN_KINDS), tera.render(TOKEN_KINDS, &context)?)?;
+    fs::write(out.join(SYNTAX_KINDS), tera.render(SYNTAX_KINDS, &context)?)?;
     Ok(())
 }
